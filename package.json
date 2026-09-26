@@ -1,0 +1,20 @@
+{
+  "name": "eventstay-platform",
+  "version": "1.0.0",
+  "description": "EventStay — Hotel, Venue & Event Booking Platform",
+  "scripts": {
+    "dev:backend": "cd backend && node server.js",
+    "dev:frontend": "cd frontend && node node_modules/vite/bin/vite.js",
+    "seed": "cd backend && node seed/seedData.js",
+    "install:all": "cd backend && npm.cmd install && cd ../frontend && npm.cmd install"
+  },
+  "keywords": [
+    "mern",
+    "hotel-booking",
+    "venue-booking",
+    "event-marketplace",
+    "react",
+    "express",
+    "mongodb"
+  ]
+}
