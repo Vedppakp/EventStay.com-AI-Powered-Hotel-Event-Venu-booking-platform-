@@ -9,13 +9,43 @@ connectDB();
 
 const app = express();
 
-// Middlewares
-app.use(cors({ origin: '*' }));
+// CORS Configuration: allows configured FRONTEND_URL in production while maintaining local dev compatibility
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
+if (process.env.FRONTEND_URL) {
+  process.env.FRONTEND_URL.split(',').forEach((url) => {
+    const cleanUrl = url.trim().replace(/\/+$/, '');
+    if (cleanUrl) allowedOrigins.push(cleanUrl);
+  });
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow non-browser requests (curl, server-to-server, mobile)
+    if (!origin) return callback(null, true);
+    // In development or when FRONTEND_URL is not set, allow all
+    if (process.env.NODE_ENV !== 'production' || !process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
+    const cleanOrigin = origin.replace(/\/+$/, '');
+    if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS policy blocked access from origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-pin']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health Check
-app.get('/api/health', (req, res) => {
+// Health Check (both root /health and /api/health for cloud load balancer and uptime monitoring)
+app.get(['/health', '/api/health'], (req, res) => {
   res.status(200).json({ status: 'ok', message: 'EventStay API is live and healthy', timestamp: new Date() });
 });
 

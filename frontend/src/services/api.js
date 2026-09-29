@@ -1,4 +1,12 @@
-const API_BASE = '/api';
+// Base API URL: uses VITE_API_URL when configured in production, falls back to '/api' for Vite dev proxy
+const getApiBase = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) return '/api';
+  const clean = envUrl.trim().replace(/\/+$/, '');
+  return clean.endsWith('/api') ? clean : `${clean}/api`;
+};
+
+const API_BASE = getApiBase();
 
 // Helper for authorized fetch
 export async function apiRequest(endpoint, options = {}) {
@@ -18,7 +26,7 @@ export async function apiRequest(endpoint, options = {}) {
   try {
     response = await fetch(`${API_BASE}${endpoint}`, config);
   } catch (netErr) {
-    throw new Error('Cannot connect to backend API server. Please ensure the backend is running on port 5000.');
+    throw new Error('Cannot connect to backend API server. Please ensure the backend is running and accessible.');
   }
 
   let data;
@@ -68,7 +76,7 @@ export const propertyAPI = {
     const token = localStorage.getItem('eventstay_token');
     const formData = new FormData();
     formData.append('file', file);
-    const response = await fetch('/api/properties/bulk-upload', {
+    const response = await fetch(`${API_BASE}/properties/bulk-upload`, {
       method: 'POST',
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -82,7 +90,7 @@ export const propertyAPI = {
     return data;
   },
   downloadTemplate: (format = 'csv') => {
-    window.open(`/api/properties/excel-template?format=${format}`, '_blank');
+    window.open(`${API_BASE}/properties/excel-template?format=${format}`, '_blank');
   }
 };
 

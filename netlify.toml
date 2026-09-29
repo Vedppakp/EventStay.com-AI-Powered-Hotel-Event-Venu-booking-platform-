@@ -1,0 +1,21 @@
+# Netlify Configuration for EventStay Frontend
+
+[build]
+  base    = "frontend"
+  publish = "dist"
+  command = "npm run build"
+
+# SPA Fallback: Route all client navigation to index.html for React Router DOM
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Security Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
